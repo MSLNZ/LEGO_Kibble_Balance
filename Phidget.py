@@ -29,7 +29,7 @@ def onAttachHandler(self):
         #If you are unsure how to use more than one Phidget channel with this event, we recommend going to
         #www.phidgets.com/docs/Using_Multiple_Phidgets for information
         
-        print("\nAttach Event:")
+        #print("\nAttach Event:")
         
         """
         * Get device information and display it.
@@ -46,9 +46,9 @@ def onAttachHandler(self):
                     "\n    -> Channel:  " + str(channel) + "\n")
         
     except PhidgetException as e:
-        print("\nError in Attach Event:")
+        #print("\nError in Attach Event:")
         DisplayError(e)
-        traceback.print_exc()
+        #traceback.print_exc()
         return
 
 """
@@ -65,7 +65,7 @@ def onDetachHandler(self):
         #If you are unsure how to use more than one Phidget channel with this event, we recommend going to
         #www.phidgets.com/docs/Using_Multiple_Phidgets for information
         
-        print("\nDetach Event:")
+        #print("\nDetach Event:")
         
         """
         * Get device information and display it.
@@ -75,16 +75,16 @@ def onDetachHandler(self):
         channel = ph.getChannel()
         if(ph.getDeviceClass() == DeviceClass.PHIDCLASS_VINT):
             hubPort = ph.getHubPort()
-            print("\n    -> Channel Class: " + channelClassName + "\n    -> Serial Number: " + str(serialNumber) +
-                "\n    -> Hub Port: " + str(hubPort) + "\n    -> Channel:  " + str(channel) + "\n")
-        else:
-            print("\n    -> Channel Class: " + channelClassName + "\n    -> Serial Number: " + str(serialNumber) +
-                    "\n    -> Channel:  " + str(channel) + "\n")
+            #print("\n    -> Channel Class: " + channelClassName + "\n    -> Serial Number: " + str(serialNumber) +
+                #"\n    -> Hub Port: " + str(hubPort) + "\n    -> Channel:  " + str(channel) + "\n")
+        #else:
+            #print("\n    -> Channel Class: " + channelClassName + "\n    -> Serial Number: " + str(serialNumber) +
+                    #"\n    -> Channel:  " + str(channel) + "\n")
         
     except PhidgetException as e:
-        print("\nError in Detach Event:")
+        #print("\nError in Detach Event:")
         DisplayError(e)
-        traceback.print_exc()
+        #traceback.print_exc()
         return
 
 """
@@ -142,23 +142,23 @@ def initialise():
         """
         * Add event handlers before calling open so that no events are missed.
         """
-        print("\n--------------------------------------")
-        print("\nSetting OnAttachHandler...")
+        #print("\n--------------------------------------")
+        #print("\nSetting OnAttachHandler...")
         ch0.setOnAttachHandler(onAttachHandler)
         ch1.setOnAttachHandler(onAttachHandler)
         
-        print("Setting OnDetachHandler...")
+        #print("Setting OnDetachHandler...")
         ch0.setOnDetachHandler(onDetachHandler)
         ch1.setOnDetachHandler(onDetachHandler)
         
-        print("Setting OnErrorHandler...")
+        #print("Setting OnErrorHandler...")
         ch0.setOnErrorHandler(onErrorHandler)
         ch1.setOnErrorHandler(onErrorHandler)
         
         """
         * Open the channel with a timeout
         """
-        print("\nOpening and Waiting for Attachment...")
+        #print("\nOpening and Waiting for Attachment...")
         
         try:
             ch0.openWaitForAttachment(5000)
@@ -175,21 +175,22 @@ def initialise():
         except PhidgetException as e:
             sys.stderr.write("\nExiting with error(s)...")
             DisplayError(e)
-            traceback.print_exc()
-            print("Cleaning up...")
+            #traceback.print_exc()
+            #print("Cleaning up...")
             ch0.close()
             ch1.close()
             return 1
     
     except EndProgramSignal as e:
-        print(e)
-        print("Cleaning up...")
-        ch.close()
+        #print(e)
+        #print("Cleaning up...")
+        ch1.close()
+        ch0.close()
         return 1
 
 def setVoltage(voltage, channel):
     try:
-        # print("--------------------\n"
+        # #print("--------------------\n"
         # "\n  | VoltageOutput voltage can be controlled by setting its Target Voltage.\n"
         # "  | The target voltage can be a number between MinVoltage and MaxVoltage.\n"
         # "\nInput a desired voltage and press ENTER\n"
@@ -197,14 +198,14 @@ def setVoltage(voltage, channel):
         try:
             voltage = float(voltage)
         except ValueError as e:
-            print("Input must be a number, or Q to quit.")
+            #print("Input must be a number, or Q to quit.")
             return 0
 
         if (voltage > ch0.getMaxVoltage() or voltage < ch0.getMinVoltage()):
-            print("Voltage must be between %.2f and %.2f\n" % (ch0.getMinVoltage(), ch0.getMaxVoltage()))
+            #print("Voltage must be between %.2f and %.2f\n" % (ch0.getMinVoltage(), ch0.getMaxVoltage()))
             return 0
 
-        print("Setting VoltageOutput Voltage to " + str(voltage))
+        #print("Setting VoltageOutput Voltage to " + str(voltage))
         if channel == 0:
             ch0.setVoltage(voltage)
         elif channel == 1:
@@ -213,14 +214,16 @@ def setVoltage(voltage, channel):
     except PhidgetException as e:
         sys.stderr.write("\nExiting with error(s)...")
         DisplayError(e)
-        traceback.print_exc()
-        print("Cleaning up...")
-        ch.close()
+        #traceback.print_exc()
+        #print("Cleaning up...")
+        ch0.close()
+        ch1.close()
         return 1
     except EndProgramSignal as e:
-        print(e)
-        print("Cleaning up...")
-        ch.close()
+        #print(e)
+        #print("Cleaning up...")
+        ch0.close()
+        ch1.close()
         return 1
 
 '''
@@ -229,10 +232,10 @@ def setVoltage(voltage, channel):
 def close():
     global ch0
     global ch1
-    print("Cleaning up...")
+    #print("Cleaning up...")
     ch0.close()
     ch1.close()
-    print("\nExiting...")
+    #print("\nExiting...")
     return 0
 
 #main()
