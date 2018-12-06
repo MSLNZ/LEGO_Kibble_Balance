@@ -185,7 +185,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.ShadowSensorFIeld.SetValue(str(self.target))
 
         def PlotMassData(self):
-                plt.plot(self.MassMeasurements)
+                plt.plot(self.MassMeasurements, 'b+')
                 plt.ylabel('Mass, g')
                 plt.xlabel('Iteration, n')
                 plt.show()
