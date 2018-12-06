@@ -22,3 +22,7 @@ wxPython 3.0.2.0 is compatible with Python 2.7.
 	python setup.py install
 `
 within the downloaded folder
+
+* matplotlib.pyplot - After making the measurements, the program uses matplotlib.pyplot to plot the mass measurements.
+This needs to be installed using the following 2 cmd commands
+```python -m pip install -U pip```, ```python -m pip install -U matplotlib```

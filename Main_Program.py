@@ -3,6 +3,7 @@ import wx
 import Phidget
 import LabJack_U6
 import thread
+import matplotlib.pyplot as plt
 
 class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         numChannels = 3  # Number of Aanalog Input channels being used
@@ -175,6 +176,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.MassMeasurements.append(self.mass)
                         self.EventLog.AppendText("Completed measurement " + str(i) + " \n")
                 self.EventLog.AppendText("Completed all measurements\n")
+                self.PlotMassData()
 
         def CalibrateShadowSensorOnButtonClick(self, event):
                 global latestAinValues
@@ -182,6 +184,11 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.target = latestAinValues[2]
                 self.ShadowSensorFIeld.SetValue(str(self.target))
 
+        def PlotMassData(self):
+                plt.plot(self.MassMeasurements)
+                plt.ylabel('Mass, g')
+                plt.xlabel('Iteration, n')
+                plt.show()
                 
 # mandatory in wx, create an app, False stands for not deteriction stdin/stdout
 # refer manual for details
