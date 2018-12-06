@@ -16,3 +16,9 @@ wxPython 3.0.2.0 is compatible with Python 2.7.
 
 * LabJack U6 - In order to communicate with LabJack U6, follow the set of instructions in 
 <https://labjack.com/support/software/examples/ud/labjackpython>.  
+
+* Phidget - To install the phidget API, download "Phidget Python module" from <https://www.phidgets.com/docs/Language_-_Python#Quick_Downloads>. Run 
+`{
+	python setup.py install
+}`
+within the downloaded folder
