@@ -18,7 +18,7 @@ wxPython 3.0.2.0 is compatible with Python 2.7.
 <https://labjack.com/support/software/examples/ud/labjackpython>.  
 
 * Phidget - To install the phidget API, download "Phidget Python module" from <https://www.phidgets.com/docs/Language_-_Python#Quick_Downloads>. Run 
-`{
+`
 	python setup.py install
-}`
+`
 within the downloaded folder
