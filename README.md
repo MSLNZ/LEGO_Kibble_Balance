@@ -15,7 +15,8 @@ work. Older versions of wxPython can be found here <https://sourceforge.net/proj
 wxPython 3.0.2.0 is compatible with Python 2.7. 
 
 * LabJack U6 - In order to communicate with LabJack U6, follow the set of instructions in 
-<https://labjack.com/support/software/examples/ud/labjackpython>.  
+<https://labjack.com/support/software/examples/ud/labjackpython>. Further more, download the .zip file
+at the bottom of the page. Extract its contents and run ``` python setup.py install ```.  
 
 * Phidget - To install the phidget API, download "Phidget Python module" from <https://www.phidgets.com/docs/Language_-_Python#Quick_Downloads>. Run 
 `
@@ -26,3 +27,6 @@ within the downloaded folder
 * matplotlib.pyplot - After making the measurements, the program uses matplotlib.pyplot to plot the mass measurements.
 This needs to be installed using the following 2 cmd commands
 ```python -m pip install -U pip```, ```python -m pip install -U matplotlib```
+
+* Phidget Control Panel - The link required to install the control panel for using the Phidget device can be found
+in <https://www.phidgets.com/docs/OS_-_Windows#Getting_started_with_Windows>.
