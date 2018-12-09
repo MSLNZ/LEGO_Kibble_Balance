@@ -4,6 +4,8 @@ import Phidget
 import LabJack_U6
 import thread
 import matplotlib.pyplot as plt
+import numpy as np
+import time
 
 class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         numChannels = 3  # Number of Aanalog Input channels being used
@@ -21,8 +23,9 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.KpParam = float(self.Kp.GetValue())
                 self.KdParam = float(self.Kd.GetValue())
                 self.NumRepeats = int(self.RepeatMeasurements.GetValue())
+                thread.start_new_thread(self.Sine, ())
 
-        def SetCoilAVoltage(self):
+        def SetCoilASupplyVoltage(self):
                 ''' Set the supply voltage for Coil A '''
                 Supply_Voltage_A = float(self.SetCoilAVoltage.GetValue())
                 # Conditions to prevent Phidget from exceeding output current limit for Coil A
@@ -43,7 +46,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.DisplayResVoltages()
                 self.CalculateMass()
 
-        def SetCoilBVoltage(self):
+        def SetCoilBSupplyVoltage(self):
                 ''' Manually set the Supply voltage on Coil B. Also implements safety conditions to prevent over
                                 current'''
                 self.EventLog.AppendText("Setting Coil B Supply Voltage to " + self.SetCoilBVoltage.GetValue() + " V\n")
@@ -117,10 +120,10 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.CurrentThroughCoilB.SetValue(str(latestAinValues[1]/178.9))
 
         def SetCoilAVoltageButtonOnButtonClick(self, event):
-                self.SetCoilAVoltage()
+                self.SetCoilASupplyVoltage()
 
         def SetCoilBVoltageButtonOnButtonClick(self, event):
-                self.SetCoilBVoltage()
+                self.SetCoilBSupplyVoltage()
 
         def LEGOKibbleBalanceOnClose(self, event):
                 ''' Close the program when user selects 'x' on the window '''
@@ -129,10 +132,10 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 quit()
 
         def CoilASupplyVoltageOnTextEnter(self, event):
-                self.SetCoilAVoltage()
+                self.SetCoilASupplyVoltage()
 
         def CoilBSupplyVoltageOnTextEnter(self, event):
-                self.SetCoilBVoltage()
+                self.SetCoilBSupplyVoltage()
 
         def CalculateMass(self):
                 ''' Calcualte the objects mass and display the mass to the user '''
@@ -169,6 +172,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 thread.start_new_thread(self.RunMeasurementsThread, ())
 
         def RunMeasurementsThread(self):
+                ''' Perform a set number of mass measurements specified on the GUI. '''
                 self.MassMeasurements = []
                 for i in range(0, self.NumRepeats):
                         self.PID()
@@ -179,17 +183,32 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.PlotMassData()
 
         def CalibrateShadowSensorOnButtonClick(self, event):
+                ''' Obtain the voltage across the photodiode for 1 instance only. '''
                 global latestAinValues
                 self.GetCoilVoltages()
                 self.target = latestAinValues[2]
                 self.ShadowSensorFIeld.SetValue(str(self.target))
 
         def PlotMassData(self):
+                ''' Plot the set of mass measurements obtained by RunMeasurementsThread. '''
                 plt.plot(self.MassMeasurements, 'b+')
                 plt.ylabel('Mass, g')
                 plt.xlabel('Iteration, n')
                 plt.show()
-                
+
+        def Sine(self):
+                ''' Make Coil A move at a constant sinusoidal velocity. '''
+                i = 0
+                timeInit = time.time()
+                while True:
+                        i = (time.time() - timeInit)
+                        if i > 500:
+                                break
+                        time.sleep(0.0007)
+                        o = 0.5*np.sin(2*i)
+                        i = i + 0.01
+                        Phidget.setVoltage(o, 0)
+
 # mandatory in wx, create an app, False stands for not deteriction stdin/stdout
 # refer manual for details
 app = wx.App(False)
