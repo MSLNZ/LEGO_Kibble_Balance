@@ -66,7 +66,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText7, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilA = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilA.Enable( False )
+		self.CurrentThroughCoilA.Enable( True )
 		
 		fgSizer1.Add( self.CurrentThroughCoilA, 0, wx.ALL, 5 )
 		
@@ -75,7 +75,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText9, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilB = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilB.Enable( False )
+		self.CurrentThroughCoilB.Enable( True )
 		
 		fgSizer1.Add( self.CurrentThroughCoilB, 0, wx.ALL, 5 )
 		
@@ -167,7 +167,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer23 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.ShadowSensorFIeld = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.ShadowSensorFIeld.Enable( False )
+		self.ShadowSensorFIeld.Enable( True )
 		
 		bSizer23.Add( self.ShadowSensorFIeld, 0, wx.ALL, 5 )
 		

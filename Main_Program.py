@@ -8,7 +8,7 @@ import numpy as np
 import time
 
 class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
-        numChannels = 3  # Number of Aanalog Input channels being used
+        numChannels = 4  # Number of Aanalog Input channels being used
         latestAinValues = [0] * numChannels  # Array for storing Voltages for each channel being used
 
         def __init__(self, parent):
@@ -23,17 +23,17 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.KpParam = float(self.Kp.GetValue())
                 self.KdParam = float(self.Kd.GetValue())
                 self.NumRepeats = int(self.RepeatMeasurements.GetValue())
-                thread.start_new_thread(self.Sine, ())
+                #thread.start_new_thread(self.Sine, ())
 
         def SetCoilASupplyVoltage(self):
                 ''' Set the supply voltage for Coil A '''
                 Supply_Voltage_A = float(self.SetCoilAVoltage.GetValue())
                 # Conditions to prevent Phidget from exceeding output current limit for Coil A
-                if (Supply_Voltage_A > 8):
+                if (Supply_Voltage_A >= 8):
                         Phidget.setVoltage(8, 0)
                         self.EventLog.AppendText(
                                 "Setting Coil A Supply Voltage to 8V to prevent Phidget output current limit\n")
-                elif (Supply_Voltage_A < -8):
+                elif (Supply_Voltage_A <= -8):
                         Phidget.setVoltage(-8, 0)
                         self.EventLog.AppendText(
                                 "Setting Coil A Supply Voltage to -8V to prevent Phidget output current limit\n")
@@ -52,11 +52,11 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.EventLog.AppendText("Setting Coil B Supply Voltage to " + self.SetCoilBVoltage.GetValue() + " V\n")
                 Supply_Voltage_B = float(self.SetCoilBVoltage.GetValue())
                 # Conditions to prevent Phidget from exceeding output current limit for Coil A
-                if (Supply_Voltage_B > 8):
+                if (Supply_Voltage_B >= 8):
                         Phidget.setVoltage(8, 1)
                         self.EventLog.AppendText(
                                 "Setting Coil B Supply Voltage to 8V to prevent Phidget output current limit\n")
-                elif (Supply_Voltage_B < -8):
+                elif (Supply_Voltage_B <= -8):
                         Phidget.setVoltage(-8, 1)
                         self.EventLog.AppendText(
                                 "Setting Coil B Supply Voltage to -8V to prevent Phidget output current limit\n")
@@ -71,13 +71,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def GetCoilVoltages(self):
                 ''' Communicate with LabJack U6 and get the voltages across the resistor in series with each coil '''
                 global numChannels, latestAinValues
-                numChannels = 3  # Number of AIN channels being used
+                numChannels = 4  # Number of AIN channels being used
                 latestAinValues = [0] * numChannels
                 resolutionIndex = 1
                 gainIndex = 0
                 settlingFactor = 0
                 differential = False
-                numIterations = 1000
+                numIterations = 100
 
                 d = LabJack_U6.U6()
                 d.getCalibrationData()
@@ -131,16 +131,16 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.Show(False)
                 quit()
 
-        def CoilASupplyVoltageOnTextEnter(self, event):
+        def SetCoilAVoltageOnTextEnter(self, event):
                 self.SetCoilASupplyVoltage()
 
-        def CoilBSupplyVoltageOnTextEnter(self, event):
+        def SetCoilBVoltageOnTextEnter(self, event):
                 self.SetCoilBSupplyVoltage()
 
         def CalculateMass(self):
                 ''' Calcualte the objects mass and display the mass to the user '''
                 currentA = float(self.CurrentThroughCoilA.GetValue())
-                averageBL = 17.27576831
+                averageBL = 11
                 gravity = 9.8189
                 self.mass = currentA*averageBL/gravity
                 self.ObjectMass.SetValue(str(self.mass*1000))
@@ -154,14 +154,16 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def PID(self):
                 ''' PID control for automatically adjusting the Kibble beam '''
                 self.integral = 0
+                self.target = 0.230056253258
                 while(True):
                         global latestAinValues
                         self.GetCoilVoltages()
-                        error = latestAinValues[2] - self.target
+                        error = self.target - latestAinValues[2]
                         self.integral = self.integral+self.KiParam*error
-                        Phidget.setVoltage(self.integral, 0)
+                        Phidget.setVoltage(self.KpParam*error+self.integral, 0)
                         self.DisplayResVoltages()
                         self.DisplayCoilCurrents()
+                        self.Kd.SetValue(str(latestAinValues[2]))
                         self.SetCoilAVoltage.SetValue(str(self.integral))
                         if abs(error) < 0.001:
                                 break
@@ -195,19 +197,40 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 plt.ylabel('Mass, g')
                 plt.xlabel('Iteration, n')
                 plt.show()
+                print(self.MassMeasurements)
 
         def Sine(self):
                 ''' Make Coil A move at a constant sinusoidal velocity. '''
+                global latestAinValues
                 i = 0
+                o = 0
+                oldTime = 0
                 timeInit = time.time()
+                times = []
+                position = []
+                coilVolt = []
+                BL = []
                 while True:
                         i = (time.time() - timeInit)
-                        if i > 500:
+                        # if oldTime == i:
+                        #         continue
+                        # oldTime = i
+                        self.GetCoilVoltages()
+                        times.append(i)
+                        position.append(round((0.117*latestAinValues[2]+0.197)/1000, 9))
+                        coilVolt.append(round(latestAinValues[3], 9))
+                        if i > 15:
                                 break
-                        time.sleep(0.0007)
-                        o = 0.5*np.sin(2*i)
-                        i = i + 0.01
+                        #time.sleep(0.001)
+                        o = 0.125*np.sin(2*i)+0.25
                         Phidget.setVoltage(o, 0)
+                print(times)
+                print("\n")
+                print(position)
+                print("\n")
+                print(coilVolt)
+
+
 
 # mandatory in wx, create an app, False stands for not deteriction stdin/stdout
 # refer manual for details
