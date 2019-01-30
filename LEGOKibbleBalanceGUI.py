@@ -66,7 +66,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText7, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilA = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilA.Enable( True )
+		self.CurrentThroughCoilA.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilA, 0, wx.ALL, 5 )
 		
@@ -75,7 +75,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText9, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilB = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilB.Enable( True )
+		self.CurrentThroughCoilB.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilB, 0, wx.ALL, 5 )
 		
@@ -115,7 +115,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer2.Add( self.m_staticText16, 0, wx.ALL, 5 )
 		
 		self.Kp = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer2.Add( self.Kp, 0, wx.ALL, 5 )
+		bSizer2.Add( self.Kp, 1, wx.BOTTOM|wx.RIGHT|wx.LEFT, 5 )
 		
 		
 		sbSizer8.Add( bSizer2, 1, wx.EXPAND, 5 )
@@ -127,7 +127,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer21.Add( self.m_staticText161, 0, wx.ALL, 5 )
 		
 		self.Ki = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"1", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer21.Add( self.Ki, 0, wx.ALL, 5 )
+		bSizer21.Add( self.Ki, 1, wx.ALL, 5 )
 		
 		
 		sbSizer8.Add( bSizer21, 1, wx.EXPAND, 5 )
@@ -139,7 +139,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer22.Add( self.m_staticText162, 0, wx.ALL, 5 )
 		
 		self.Kd = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer22.Add( self.Kd, 0, wx.ALL, 5 )
+		bSizer22.Add( self.Kd, 1, wx.ALL, 5 )
 		
 		
 		sbSizer8.Add( bSizer22, 1, wx.EXPAND, 5 )
@@ -151,7 +151,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer14.Add( self.m_staticText25, 0, wx.ALL, 5 )
 		
 		self.RepeatMeasurements = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"1", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer14.Add( self.RepeatMeasurements, 0, wx.ALL, 5 )
+		bSizer14.Add( self.RepeatMeasurements, 1, wx.ALL, 5 )
 		
 		
 		sbSizer8.Add( bSizer14, 1, wx.EXPAND, 5 )
@@ -167,7 +167,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer23 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.ShadowSensorFIeld = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.ShadowSensorFIeld.Enable( True )
+		self.ShadowSensorFIeld.Enable( False )
 		
 		bSizer23.Add( self.ShadowSensorFIeld, 0, wx.ALL, 5 )
 		
@@ -222,9 +222,31 @@ class LEGOKibbleBalance ( wx.Frame ):
 		
 		fgSizer4.Add( sbSizer14, 1, wx.EXPAND, 5 )
 		
+		sbSizer61 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Analysis" ), wx.VERTICAL )
+		
+		gSizer1 = wx.GridSizer( 0, 1, 0, 0 )
+		
+		self.GraphMassCheckBox = wx.CheckBox( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Graph Mass Measurements", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gSizer1.Add( self.GraphMassCheckBox, 0, wx.ALL, 5 )
+		
+		
+		sbSizer61.Add( gSizer1, 1, wx.EXPAND, 5 )
+		
+		
+		fgSizer4.Add( sbSizer61, 1, wx.EXPAND, 5 )
+		
 		
 		self.SetSizer( fgSizer4 )
 		self.Layout()
+		self.m_menubar1 = wx.MenuBar( 0 )
+		self.File = wx.Menu()
+		self.About = wx.MenuItem( self.File, wx.ID_ANY, u"About", wx.EmptyString, wx.ITEM_NORMAL )
+		self.File.AppendItem( self.About )
+		
+		self.m_menubar1.Append( self.File, u"File" ) 
+		
+		self.SetMenuBar( self.m_menubar1 )
+		
 		
 		self.Centre( wx.BOTH )
 		
@@ -241,6 +263,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		self.SetCoilBVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilBVoltageOnTextEnter )
 		self.SetCoilBVoltageButton.Bind( wx.EVT_BUTTON, self.SetCoilBVoltageButtonOnButtonClick )
 		self.RunKibbleBalance.Bind( wx.EVT_BUTTON, self.RunKibbleBalanceOnButtonClick )
+		self.Bind( wx.EVT_MENU, self.AboutOnMenuSelection, id = self.About.GetId() )
 	
 	def __del__( self ):
 		pass
@@ -281,6 +304,51 @@ class LEGOKibbleBalance ( wx.Frame ):
 		event.Skip()
 	
 	def RunKibbleBalanceOnButtonClick( self, event ):
+		event.Skip()
+	
+	def AboutOnMenuSelection( self, event ):
+		event.Skip()
+	
+
+###########################################################################
+## Class AboutFrame
+###########################################################################
+
+class AboutFrame ( wx.Frame ):
+	
+	def __init__( self, parent ):
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"About", pos = wx.DefaultPosition, size = wx.Size( 490,300 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		
+		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+		
+		fgSizer3 = wx.FlexGridSizer( 0, 1, 0, 0 )
+		fgSizer3.SetFlexibleDirection( wx.BOTH )
+		fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_textCtrl14 = wx.TextCtrl( self, wx.ID_ANY, u"LEGO Kibble Balance Software V 1.0\nAuthors: Ikram Singh, Ryan Curry\nInstitution: Measurement Standards Laboratory\nCompany: Callaghan Innovation\n\nThe LEGO Kibble Balance Software is an interface for operating the LEGO Kibble Balance. It is written in Python and is open source on https://github.com/MSLNZ/LEGO_Kibble_Balance. ", wx.DefaultPosition, wx.DefaultSize, wx.TE_AUTO_URL|wx.TE_MULTILINE )
+		self.m_textCtrl14.SetMinSize( wx.Size( 470,255 ) )
+		
+		fgSizer3.Add( self.m_textCtrl14, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
+		
+		
+		self.SetSizer( fgSizer3 )
+		self.Layout()
+		
+		self.Centre( wx.BOTH )
+		
+		# Connect Events
+		self.Bind( wx.EVT_CLOSE, self.AboutFrameOnClose )
+		self.m_textCtrl14.Bind( wx.EVT_LEFT_DOWN, self.GithubURL )
+	
+	def __del__( self ):
+		pass
+	
+	
+	# Virtual event handlers, overide them in your derived class
+	def AboutFrameOnClose( self, event ):
+		event.Skip()
+	
+	def GithubURL( self, event ):
 		event.Skip()
 	
 

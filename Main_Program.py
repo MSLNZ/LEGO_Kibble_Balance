@@ -6,6 +6,19 @@ import thread
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import webbrowser
+
+class AboutFrame(LEGOKibbleBalanceGUI.AboutFrame):
+
+        def __init__(self, parent):
+                LEGOKibbleBalanceGUI.AboutFrame.__init__(self, parent)
+
+        def GithubURL(self, event):
+                url = 'https://github.com/MSLNZ/LEGO_Kibble_Balance'
+
+                # Open URL in a new tab, if a browser window is already open.
+                webbrowser.open_new_tab(url)
+
 
 class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         numChannels = 4  # Number of Aanalog Input channels being used
@@ -138,7 +151,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.SetCoilBSupplyVoltage()
 
         def CalculateMass(self):
-                ''' Calcualte the objects mass and display the mass to the user '''
+                ''' Calculate the objects mass and display the mass to the user '''
                 currentA = float(self.CurrentThroughCoilA.GetValue())
                 averageBL = 11
                 gravity = 9.8189
@@ -146,6 +159,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.ObjectMass.SetValue(str(self.mass*1000))
 
         def SetAutomaticControlOnButtonClick(self, event):
+                ''' Sets the Parameters for PID Control '''
                 self.KiParam = float(self.Ki.GetValue())
                 self.KpParam = float(self.Kp.GetValue())
                 self.KdParam = float(self.Kd.GetValue())
@@ -182,7 +196,8 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.MassMeasurements.append(self.mass)
                         self.EventLog.AppendText("Completed measurement " + str(i) + " \n")
                 self.EventLog.AppendText("Completed all measurements\n")
-                self.PlotMassData()
+                if(self.GraphMassCheckBox.GetValue()):
+                        self.PlotMassData()
 
         def CalibrateShadowSensorOnButtonClick(self, event):
                 ''' Obtain the voltage across the photodiode for 1 instance only. '''
@@ -229,6 +244,17 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 print(position)
                 print("\n")
                 print(coilVolt)
+
+        def AboutOnMenuSelection(self, event):
+                # mandatory in wx, create an app, False stands for not deteriction stdin/stdout
+                # refer manual for details
+                app2 = wx.App(False)
+                # create an object of CalcFrame
+                frame2 = AboutFrame(None)
+                # show the frame
+                frame2.Show(True)
+                # start the applications
+                app2.MainLoop()
 
 
 
