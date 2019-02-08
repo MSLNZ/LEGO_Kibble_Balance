@@ -66,7 +66,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText7, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilA = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilA.Enable( False )
+		self.CurrentThroughCoilA.Enable( True )
 		
 		fgSizer1.Add( self.CurrentThroughCoilA, 0, wx.ALL, 5 )
 		
@@ -75,7 +75,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText9, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilB = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilB.Enable( False )
+		self.CurrentThroughCoilB.Enable( True )
 		
 		fgSizer1.Add( self.CurrentThroughCoilB, 0, wx.ALL, 5 )
 		
@@ -177,6 +177,17 @@ class LEGOKibbleBalance ( wx.Frame ):
 		
 		sbSizer9.Add( bSizer23, 1, wx.EXPAND, 5 )
 		
+		bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
+		
+		self.IOffsetField = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer8.Add( self.IOffsetField, 0, wx.ALL, 5 )
+		
+		self.IOffsetButton = wx.Button( sbSizer9.GetStaticBox(), wx.ID_ANY, u"Calibrate Current Offset", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer8.Add( self.IOffsetButton, 0, wx.ALL, 5 )
+		
+		
+		sbSizer9.Add( bSizer8, 1, wx.EXPAND, 5 )
+		
 		bSizer15 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.SetCoilAVoltage = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, u"0.0", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -258,6 +269,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		self.RepeatMeasurements.Bind( wx.EVT_TEXT_ENTER, self.RepeatMeasurementsOnTextEnter )
 		self.SetAutomaticControl.Bind( wx.EVT_BUTTON, self.SetAutomaticControlOnButtonClick )
 		self.CalibrateShadowSensor.Bind( wx.EVT_BUTTON, self.CalibrateShadowSensorOnButtonClick )
+		self.IOffsetButton.Bind( wx.EVT_BUTTON, self.IOffsetButtonOnButtonClick )
 		self.SetCoilAVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilAVoltageOnTextEnter )
 		self.SetCoilAVoltageButton.Bind( wx.EVT_BUTTON, self.SetCoilAVoltageButtonOnButtonClick )
 		self.SetCoilBVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilBVoltageOnTextEnter )
@@ -289,6 +301,9 @@ class LEGOKibbleBalance ( wx.Frame ):
 		event.Skip()
 	
 	def CalibrateShadowSensorOnButtonClick( self, event ):
+		event.Skip()
+	
+	def IOffsetButtonOnButtonClick( self, event ):
 		event.Skip()
 	
 	def SetCoilAVoltageOnTextEnter( self, event ):
@@ -326,7 +341,7 @@ class AboutFrame ( wx.Frame ):
 		fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 		
 		self.m_textCtrl14 = wx.TextCtrl( self, wx.ID_ANY, u"LEGO Kibble Balance Software V 1.0\nAuthors: Ikram Singh, Ryan Curry\nInstitution: Measurement Standards Laboratory\nCompany: Callaghan Innovation\n\nThe LEGO Kibble Balance Software is an interface for operating the LEGO Kibble Balance. It is written in Python and is open source on https://github.com/MSLNZ/LEGO_Kibble_Balance. ", wx.DefaultPosition, wx.DefaultSize, wx.TE_AUTO_URL|wx.TE_MULTILINE )
-		self.m_textCtrl14.SetMinSize( wx.Size( 470,255 ) )
+		self.m_textCtrl14.SetMinSize( wx.Size( 465,250 ) )
 		
 		fgSizer3.Add( self.m_textCtrl14, 0, wx.ALL|wx.ALIGN_BOTTOM, 5 )
 		

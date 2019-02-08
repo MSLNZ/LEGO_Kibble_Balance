@@ -15,13 +15,11 @@ class AboutFrame(LEGOKibbleBalanceGUI.AboutFrame):
 
         def GithubURL(self, event):
                 url = 'https://github.com/MSLNZ/LEGO_Kibble_Balance'
-
-                # Open URL in a new tab, if a browser window is already open.
                 webbrowser.open_new_tab(url)
 
 
 class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
-        numChannels = 4  # Number of Aanalog Input channels being used
+        numChannels = 3  # Number of Analog Input channels being used
         latestAinValues = [0] * numChannels  # Array for storing Voltages for each channel being used
 
         def __init__(self, parent):
@@ -37,6 +35,9 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.KdParam = float(self.Kd.GetValue())
                 self.NumRepeats = int(self.RepeatMeasurements.GetValue())
                 #thread.start_new_thread(self.Sine, ())
+
+                self.currents = []
+                self.phidgetVoltages = []
 
         def SetCoilASupplyVoltage(self):
                 ''' Set the supply voltage for Coil A '''
@@ -84,13 +85,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def GetCoilVoltages(self):
                 ''' Communicate with LabJack U6 and get the voltages across the resistor in series with each coil '''
                 global numChannels, latestAinValues
-                numChannels = 4  # Number of AIN channels being used
+                numChannels = 3  # Number of AIN channels being used
                 latestAinValues = [0] * numChannels
                 resolutionIndex = 1
                 gainIndex = 0
                 settlingFactor = 0
                 differential = False
-                numIterations = 100
+                numIterations = 1000
 
                 d = LabJack_U6.U6()
                 d.getCalibrationData()
@@ -152,11 +153,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
         def CalculateMass(self):
                 ''' Calculate the objects mass and display the mass to the user '''
-                currentA = float(self.CurrentThroughCoilA.GetValue())
-                averageBL = 11
-                gravity = 9.8189
-                self.mass = currentA*averageBL/gravity
-                self.ObjectMass.SetValue(str(self.mass*1000))
+                #OffsetI = (float)(self.IOffsetField.GetValue())
+                currentA = float(self.CurrentThroughCoilA.GetValue())#-OffsetI
+                #averageBL = 6.146513647#8.879173952#11.49739634#9.126187777#10.26402003#11
+                #gravity = 9.8189
+                #self.mass = currentA*averageBL/gravity
+                self.mass = -906*currentA - 0.141
+                self.ObjectMass.SetValue(str(self.mass))
 
         def SetAutomaticControlOnButtonClick(self, event):
                 ''' Sets the Parameters for PID Control '''
@@ -167,35 +170,69 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
         def PID(self):
                 ''' PID control for automatically adjusting the Kibble beam '''
+                count = 0
                 self.integral = 0
-                self.target = 0.230056253258
+                self.target = (float)(self.ShadowSensorFIeld.GetValue())
+                self.GoToZero()
+                time.sleep(3)
                 while(True):
                         global latestAinValues
                         self.GetCoilVoltages()
                         error = self.target - latestAinValues[2]
                         self.integral = self.integral+self.KiParam*error
-                        Phidget.setVoltage(self.KpParam*error+self.integral, 0)
+                        Phidget.setVoltage(-(self.KpParam*error+self.integral), 0)
                         self.DisplayResVoltages()
                         self.DisplayCoilCurrents()
-                        self.Kd.SetValue(str(latestAinValues[2]))
-                        self.SetCoilAVoltage.SetValue(str(self.integral))
-                        if abs(error) < 0.001:
+                        #self.Kd.SetValue(str(latestAinValues[2]))
+                        self.SetCoilAVoltage.SetValue(str(self.KpParam*error+self.integral))
+                        if abs(error) < 0.005:
+                                count = count + 1
+                        else:
+                                count = 0
+                        if count > 5:
                                 break
+
                 self.DisplayCoilCurrents()
                 self.DisplayResVoltages()
+                currentA = float(self.CurrentThroughCoilA.GetValue())
+                phidgetVoltage = float(self.SetCoilAVoltage.GetValue())
+                self.currents.append(currentA)
+                self.phidgetVoltages.append(phidgetVoltage)
+                self.GoToZero()
+
+        def GoToZero(self):
+                i = float(self.SetCoilAVoltage.GetValue())
+                while i != 0:
+                        Phidget.setVoltage(-i, 0)
+                        self.SetCoilAVoltage.SetValue(str(i))
+                        time.sleep(0.3)
+                        if i > 0:
+                                i = i - 0.01
+                        else:
+                                i = i + 0.01
+                        if abs(i) < 0.3:
+                                i = 0
+                Phidget.setVoltage(0, 0)
+                self.SetCoilAVoltage.SetValue("0")
 
         def RunKibbleBalanceOnButtonClick(self, event):
                 thread.start_new_thread(self.RunMeasurementsThread, ())
 
         def RunMeasurementsThread(self):
                 ''' Perform a set number of mass measurements specified on the GUI. '''
+                plt.close()
                 self.MassMeasurements = []
+                self.currents = []
+                self.phidgetVoltages = []
                 for i in range(0, self.NumRepeats):
+                        self.EventLog.AppendText("Begin measurement " + str(i+1) + "\n")
                         self.PID()
                         self.CalculateMass()
                         self.MassMeasurements.append(self.mass)
-                        self.EventLog.AppendText("Completed measurement " + str(i) + " \n")
+                        self.EventLog.AppendText("Completed measurement " + str(i+1) + " \n")
                 self.EventLog.AppendText("Completed all measurements\n")
+                print(self.currents)
+                print(self.phidgetVoltages)
                 if(self.GraphMassCheckBox.GetValue()):
                         self.PlotMassData()
 
@@ -211,8 +248,8 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 plt.plot(self.MassMeasurements, 'b+')
                 plt.ylabel('Mass, g')
                 plt.xlabel('Iteration, n')
-                plt.show()
                 print(self.MassMeasurements)
+                plt.show()
 
         def Sine(self):
                 ''' Make Coil A move at a constant sinusoidal velocity. '''
@@ -255,6 +292,9 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 frame2.Show(True)
                 # start the applications
                 app2.MainLoop()
+
+        def IOffsetButtonOnButtonClick(self, event):
+                self.IOffsetField.SetValue(self.CurrentThroughCoilA.GetValue())
 
 
 
