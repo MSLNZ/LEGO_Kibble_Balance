@@ -66,7 +66,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText7, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilA = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilA.Enable( True )
+		self.CurrentThroughCoilA.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilA, 0, wx.ALL, 5 )
 		
@@ -75,7 +75,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText9, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilB = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilB.Enable( True )
+		self.CurrentThroughCoilB.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilB, 0, wx.ALL, 5 )
 		
@@ -233,12 +233,23 @@ class LEGOKibbleBalance ( wx.Frame ):
 		
 		fgSizer4.Add( sbSizer14, 1, wx.EXPAND, 5 )
 		
-		sbSizer61 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Analysis" ), wx.VERTICAL )
+		sbSizer61 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Analysis / Laser Control" ), wx.VERTICAL )
 		
 		gSizer1 = wx.GridSizer( 0, 1, 0, 0 )
 		
 		self.GraphMassCheckBox = wx.CheckBox( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Graph Mass Measurements", wx.DefaultPosition, wx.DefaultSize, 0 )
 		gSizer1.Add( self.GraphMassCheckBox, 0, wx.ALL, 5 )
+		
+		gSizer2 = wx.GridSizer( 0, 2, 0, 0 )
+		
+		self.DotLaser = wx.Button( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Dot Laser", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gSizer2.Add( self.DotLaser, 0, wx.ALL, 5 )
+		
+		self.LineLaser = wx.Button( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Line Laser", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gSizer2.Add( self.LineLaser, 0, wx.ALL, 5 )
+		
+		
+		gSizer1.Add( gSizer2, 1, wx.EXPAND, 5 )
 		
 		
 		sbSizer61.Add( gSizer1, 1, wx.EXPAND, 5 )
@@ -275,6 +286,8 @@ class LEGOKibbleBalance ( wx.Frame ):
 		self.SetCoilBVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilBVoltageOnTextEnter )
 		self.SetCoilBVoltageButton.Bind( wx.EVT_BUTTON, self.SetCoilBVoltageButtonOnButtonClick )
 		self.RunKibbleBalance.Bind( wx.EVT_BUTTON, self.RunKibbleBalanceOnButtonClick )
+		self.DotLaser.Bind( wx.EVT_BUTTON, self.DotLaserOnButtonClick )
+		self.LineLaser.Bind( wx.EVT_BUTTON, self.LineLaserOnButtonClick )
 		self.Bind( wx.EVT_MENU, self.AboutOnMenuSelection, id = self.About.GetId() )
 	
 	def __del__( self ):
@@ -319,6 +332,12 @@ class LEGOKibbleBalance ( wx.Frame ):
 		event.Skip()
 	
 	def RunKibbleBalanceOnButtonClick( self, event ):
+		event.Skip()
+	
+	def DotLaserOnButtonClick( self, event ):
+		event.Skip()
+	
+	def LineLaserOnButtonClick( self, event ):
 		event.Skip()
 	
 	def AboutOnMenuSelection( self, event ):

@@ -6,7 +6,10 @@ import thread
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import serial
 import webbrowser
+
+arduino = serial.Serial('COM4', 9600, timeout=0)
 
 class AboutFrame(LEGOKibbleBalanceGUI.AboutFrame):
 
@@ -38,6 +41,35 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
                 self.currents = []
                 self.phidgetVoltages = []
+
+                # Setup parameters for laser controls
+                time.sleep(3)
+                arduino.write('H')
+                arduino.write('I')
+                self.dotLaserOn = 1
+                self.lineLaserOn = 1
+                self.DotLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
+                self.LineLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
+
+        def DotLaserOnButtonClick(self, event):
+                if(self.dotLaserOn == 0):
+                        arduino.write('H')
+                        self.dotLaserOn = 1
+                        self.DotLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
+                else:
+                        arduino.write('L')
+                        self.dotLaserOn = 0
+                        self.DotLaser.SetBackgroundColour(wx.Colour(255, 0, 0))
+
+        def LineLaserOnButtonClick(self, event):
+                if (self.lineLaserOn == 0):
+                        arduino.write('I')
+                        self.lineLaserOn = 1
+                        self.LineLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
+                else:
+                        arduino.write('M')
+                        self.lineLaserOn = 0
+                        self.LineLaser.SetBackgroundColour(wx.Colour(255, 0, 0))
 
         def SetCoilASupplyVoltage(self):
                 ''' Set the supply voltage for Coil A '''
@@ -180,7 +212,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.GetCoilVoltages()
                         error = self.target - latestAinValues[2]
                         self.integral = self.integral+self.KiParam*error
-                        Phidget.setVoltage(-(self.KpParam*error+self.integral), 0)
+                        Phidget.setVoltage((self.KpParam*error+self.integral), 0)
                         self.DisplayResVoltages()
                         self.DisplayCoilCurrents()
                         #self.Kd.SetValue(str(latestAinValues[2]))
@@ -203,7 +235,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def GoToZero(self):
                 i = float(self.SetCoilAVoltage.GetValue())
                 while i != 0:
-                        Phidget.setVoltage(-i, 0)
+                        Phidget.setVoltage(i, 0)
                         self.SetCoilAVoltage.SetValue(str(i))
                         time.sleep(0.3)
                         if i > 0:
