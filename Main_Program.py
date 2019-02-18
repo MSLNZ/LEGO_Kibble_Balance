@@ -41,6 +41,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
                 self.currents = []
                 self.phidgetVoltages = []
+                self.MassMeasurements = []
 
                 # Setup parameters for laser controls
                 time.sleep(3)
@@ -50,6 +51,8 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.lineLaserOn = 1
                 self.DotLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
                 self.LineLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
+
+                self.Sine()
 
         def DotLaserOnButtonClick(self, event):
                 if(self.dotLaserOn == 0):
@@ -123,7 +126,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 gainIndex = 0
                 settlingFactor = 0
                 differential = False
-                numIterations = 1000
+                numIterations = 50
 
                 d = LabJack_U6.U6()
                 d.getCalibrationData()
@@ -145,12 +148,19 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
                         # start = datetime.now()
                         # Call Feedback 1000 (default) times
+
                         i = 0
+                        for j in range(numChannels):
+                                latestAinValues[j] = 0
                         while i < numIterations:
                                 results = d.getFeedback(feedbackArguments)
                                 for j in range(numChannels):
-                                        latestAinValues[j] = d.binaryToCalibratedAnalogVoltage(gainIndex, results[2 + j])
+                                        latestAinValues[j] += d.binaryToCalibratedAnalogVoltage(gainIndex, results[2 + j])
                                 i += 1
+
+                        for j in range(numChannels):
+                                latestAinValues[j] = latestAinValues[j]/float(numIterations)
+
 
                 finally:
                         d.close()
@@ -190,7 +200,8 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 #averageBL = 6.146513647#8.879173952#11.49739634#9.126187777#10.26402003#11
                 #gravity = 9.8189
                 #self.mass = currentA*averageBL/gravity
-                self.mass = -906*currentA - 0.141
+                #self.mass = -906*currentA - 0.141
+                self.mass = -766*currentA + 0.123
                 self.ObjectMass.SetValue(str(self.mass))
 
         def SetAutomaticControlOnButtonClick(self, event):
@@ -212,12 +223,12 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.GetCoilVoltages()
                         error = self.target - latestAinValues[2]
                         self.integral = self.integral+self.KiParam*error
-                        Phidget.setVoltage((self.KpParam*error+self.integral), 0)
+                        Phidget.setVoltage((self.KpParam*error+self.integral), 1)
                         self.DisplayResVoltages()
                         self.DisplayCoilCurrents()
                         #self.Kd.SetValue(str(latestAinValues[2]))
                         self.SetCoilAVoltage.SetValue(str(self.KpParam*error+self.integral))
-                        if abs(error) < 0.005:
+                        if abs(error) < 0.001:
                                 count = count + 1
                         else:
                                 count = 0
@@ -226,8 +237,8 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
                 self.DisplayCoilCurrents()
                 self.DisplayResVoltages()
-                currentA = float(self.CurrentThroughCoilA.GetValue())
-                phidgetVoltage = float(self.SetCoilAVoltage.GetValue())
+                currentA = float(self.CurrentThroughCoilB.GetValue())
+                phidgetVoltage = float(self.SetCoilBVoltage.GetValue())
                 self.currents.append(currentA)
                 self.phidgetVoltages.append(phidgetVoltage)
                 self.GoToZero()
@@ -235,13 +246,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def GoToZero(self):
                 i = float(self.SetCoilAVoltage.GetValue())
                 while i != 0:
-                        Phidget.setVoltage(i, 0)
+                        Phidget.setVoltage(i, 1)
                         self.SetCoilAVoltage.SetValue(str(i))
                         time.sleep(0.3)
                         if i > 0:
-                                i = i - 0.01
+                                i = i - 0.05
                         else:
-                                i = i + 0.01
+                                i = i + 0.05
                         if abs(i) < 0.3:
                                 i = 0
                 Phidget.setVoltage(0, 0)
@@ -252,6 +263,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
         def RunMeasurementsThread(self):
                 ''' Perform a set number of mass measurements specified on the GUI. '''
+                #plt.clf()
                 plt.close()
                 self.MassMeasurements = []
                 self.currents = []
@@ -265,7 +277,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.EventLog.AppendText("Completed all measurements\n")
                 print(self.currents)
                 print(self.phidgetVoltages)
-                if(self.GraphMassCheckBox.GetValue()):
+                if self.GraphMassCheckBox.GetValue():
                         self.PlotMassData()
 
         def CalibrateShadowSensorOnButtonClick(self, event):
@@ -300,13 +312,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         #         continue
                         # oldTime = i
                         self.GetCoilVoltages()
-                        times.append(i)
-                        position.append(round((0.117*latestAinValues[2]+0.197)/1000, 9))
-                        coilVolt.append(round(latestAinValues[3], 9))
-                        if i > 15:
+                        times.append(round(i, 6))
+                        position.append(round((-11.6*latestAinValues[2]-3.09)/1000, 6))
+                        coilVolt.append(round(latestAinValues[1], 6))
+                        if i > 30:
                                 break
                         #time.sleep(0.001)
-                        o = 0.125*np.sin(2*i)+0.25
+                        o = 0.15*np.sin(8*i)
                         Phidget.setVoltage(o, 0)
                 print(times)
                 print("\n")
