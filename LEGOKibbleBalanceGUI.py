@@ -17,7 +17,7 @@ import wx.xrc
 class LEGOKibbleBalance ( wx.Frame ):
 	
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"LEGO Kibble Balance", pos = wx.DefaultPosition, size = wx.Size( 563,720 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"LEGO Kibble Balance Advanced Mode", pos = wx.DefaultPosition, size = wx.Size( 590,720 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		
@@ -66,7 +66,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText7, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilA = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilA.Enable( True )
+		self.CurrentThroughCoilA.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilA, 0, wx.ALL, 5 )
 		
@@ -75,7 +75,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		fgSizer1.Add( self.m_staticText9, 0, wx.ALL, 5 )
 		
 		self.CurrentThroughCoilB = wx.TextCtrl( sbSizer6.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.CurrentThroughCoilB.Enable( True )
+		self.CurrentThroughCoilB.Enable( False )
 		
 		fgSizer1.Add( self.CurrentThroughCoilB, 0, wx.ALL, 5 )
 		
@@ -126,7 +126,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		self.m_staticText161.Wrap( -1 )
 		bSizer21.Add( self.m_staticText161, 0, wx.ALL, 5 )
 		
-		self.Ki = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"1", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.Ki = wx.TextCtrl( sbSizer8.GetStaticBox(), wx.ID_ANY, u"0.1", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer21.Add( self.Ki, 1, wx.ALL, 5 )
 		
 		
@@ -167,7 +167,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		bSizer23 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.ShadowSensorFIeld = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.ShadowSensorFIeld.Enable( True )
+		self.ShadowSensorFIeld.Enable( False )
 		
 		bSizer23.Add( self.ShadowSensorFIeld, 0, wx.ALL, 5 )
 		
@@ -176,17 +176,6 @@ class LEGOKibbleBalance ( wx.Frame ):
 		
 		
 		sbSizer9.Add( bSizer23, 1, wx.EXPAND, 5 )
-		
-		bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
-		
-		self.IOffsetField = wx.TextCtrl( sbSizer9.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer8.Add( self.IOffsetField, 0, wx.ALL, 5 )
-		
-		self.IOffsetButton = wx.Button( sbSizer9.GetStaticBox(), wx.ID_ANY, u"Calibrate Current Offset", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer8.Add( self.IOffsetButton, 0, wx.ALL, 5 )
-		
-		
-		sbSizer9.Add( bSizer8, 1, wx.EXPAND, 5 )
 		
 		bSizer15 = wx.BoxSizer( wx.HORIZONTAL )
 		
@@ -233,7 +222,7 @@ class LEGOKibbleBalance ( wx.Frame ):
 		
 		fgSizer4.Add( sbSizer14, 1, wx.EXPAND, 5 )
 		
-		sbSizer61 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Analysis / Laser Control" ), wx.VERTICAL )
+		sbSizer61 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Miscellaneous" ), wx.VERTICAL )
 		
 		gSizer1 = wx.GridSizer( 0, 1, 0, 0 )
 		
@@ -241,9 +230,6 @@ class LEGOKibbleBalance ( wx.Frame ):
 		gSizer1.Add( self.GraphMassCheckBox, 0, wx.ALL, 5 )
 		
 		gSizer2 = wx.GridSizer( 0, 2, 0, 0 )
-		
-		self.DotLaser = wx.Button( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Dot Laser", wx.DefaultPosition, wx.DefaultSize, 0 )
-		gSizer2.Add( self.DotLaser, 0, wx.ALL, 5 )
 		
 		self.LineLaser = wx.Button( sbSizer61.GetStaticBox(), wx.ID_ANY, u"Line Laser", wx.DefaultPosition, wx.DefaultSize, 0 )
 		gSizer2.Add( self.LineLaser, 0, wx.ALL, 5 )
@@ -280,13 +266,11 @@ class LEGOKibbleBalance ( wx.Frame ):
 		self.RepeatMeasurements.Bind( wx.EVT_TEXT_ENTER, self.RepeatMeasurementsOnTextEnter )
 		self.SetAutomaticControl.Bind( wx.EVT_BUTTON, self.SetAutomaticControlOnButtonClick )
 		self.CalibrateShadowSensor.Bind( wx.EVT_BUTTON, self.CalibrateShadowSensorOnButtonClick )
-		self.IOffsetButton.Bind( wx.EVT_BUTTON, self.IOffsetButtonOnButtonClick )
 		self.SetCoilAVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilAVoltageOnTextEnter )
 		self.SetCoilAVoltageButton.Bind( wx.EVT_BUTTON, self.SetCoilAVoltageButtonOnButtonClick )
 		self.SetCoilBVoltage.Bind( wx.EVT_TEXT_ENTER, self.SetCoilBVoltageOnTextEnter )
 		self.SetCoilBVoltageButton.Bind( wx.EVT_BUTTON, self.SetCoilBVoltageButtonOnButtonClick )
 		self.RunKibbleBalance.Bind( wx.EVT_BUTTON, self.RunKibbleBalanceOnButtonClick )
-		self.DotLaser.Bind( wx.EVT_BUTTON, self.DotLaserOnButtonClick )
 		self.LineLaser.Bind( wx.EVT_BUTTON, self.LineLaserOnButtonClick )
 		self.Bind( wx.EVT_MENU, self.AboutOnMenuSelection, id = self.About.GetId() )
 	
@@ -316,9 +300,6 @@ class LEGOKibbleBalance ( wx.Frame ):
 	def CalibrateShadowSensorOnButtonClick( self, event ):
 		event.Skip()
 	
-	def IOffsetButtonOnButtonClick( self, event ):
-		event.Skip()
-	
 	def SetCoilAVoltageOnTextEnter( self, event ):
 		event.Skip()
 	
@@ -332,9 +313,6 @@ class LEGOKibbleBalance ( wx.Frame ):
 		event.Skip()
 	
 	def RunKibbleBalanceOnButtonClick( self, event ):
-		event.Skip()
-	
-	def DotLaserOnButtonClick( self, event ):
 		event.Skip()
 	
 	def LineLaserOnButtonClick( self, event ):

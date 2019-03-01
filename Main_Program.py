@@ -45,24 +45,11 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
                 # Setup parameters for laser controls
                 time.sleep(3)
-                arduino.write('H')
                 arduino.write('I')
-                self.dotLaserOn = 1
                 self.lineLaserOn = 1
-                self.DotLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
                 self.LineLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
 
-                self.Sine()
-
-        def DotLaserOnButtonClick(self, event):
-                if(self.dotLaserOn == 0):
-                        arduino.write('H')
-                        self.dotLaserOn = 1
-                        self.DotLaser.SetBackgroundColour(wx.Colour(0, 255, 0))
-                else:
-                        arduino.write('L')
-                        self.dotLaserOn = 0
-                        self.DotLaser.SetBackgroundColour(wx.Colour(255, 0, 0))
+                #self.Sine()
 
         def LineLaserOnButtonClick(self, event):
                 if (self.lineLaserOn == 0):
@@ -126,7 +113,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 gainIndex = 0
                 settlingFactor = 0
                 differential = False
-                numIterations = 50
+                numIterations = 1000
 
                 d = LabJack_U6.U6()
                 d.getCalibrationData()
@@ -196,12 +183,12 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
         def CalculateMass(self):
                 ''' Calculate the objects mass and display the mass to the user '''
                 #OffsetI = (float)(self.IOffsetField.GetValue())
-                currentA = float(self.CurrentThroughCoilA.GetValue())#-OffsetI
+                currentB = float(self.CurrentThroughCoilB.GetValue())#-OffsetI
                 #averageBL = 6.146513647#8.879173952#11.49739634#9.126187777#10.26402003#11
                 #gravity = 9.8189
                 #self.mass = currentA*averageBL/gravity
                 #self.mass = -906*currentA - 0.141
-                self.mass = -766*currentA + 0.123
+                self.mass = 696 * currentB - 0.0411  # CALIBRATION
                 self.ObjectMass.SetValue(str(self.mass))
 
         def SetAutomaticControlOnButtonClick(self, event):
@@ -215,7 +202,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 ''' PID control for automatically adjusting the Kibble beam '''
                 count = 0
                 self.integral = 0
-                self.target = (float)(self.ShadowSensorFIeld.GetValue())
+                self.target = float((self.ShadowSensorFIeld.GetValue()))
                 self.GoToZero()
                 time.sleep(3)
                 while(True):
@@ -227,7 +214,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.DisplayResVoltages()
                         self.DisplayCoilCurrents()
                         #self.Kd.SetValue(str(latestAinValues[2]))
-                        self.SetCoilAVoltage.SetValue(str(self.KpParam*error+self.integral))
+                        self.SetCoilBVoltage.SetValue(str(self.KpParam*error+self.integral))
                         if abs(error) < 0.001:
                                 count = count + 1
                         else:
@@ -244,19 +231,19 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                 self.GoToZero()
 
         def GoToZero(self):
-                i = float(self.SetCoilAVoltage.GetValue())
+                i = float(self.SetCoilBVoltage.GetValue())
                 while i != 0:
                         Phidget.setVoltage(i, 1)
-                        self.SetCoilAVoltage.SetValue(str(i))
+                        self.SetCoilBVoltage.SetValue(str(i))
                         time.sleep(0.3)
                         if i > 0:
-                                i = i - 0.05
+                                i = i - 0.01
                         else:
-                                i = i + 0.05
+                                i = i + 0.01
                         if abs(i) < 0.3:
                                 i = 0
                 Phidget.setVoltage(0, 0)
-                self.SetCoilAVoltage.SetValue("0")
+                self.SetCoilBVoltage.SetValue("0")
 
         def RunKibbleBalanceOnButtonClick(self, event):
                 thread.start_new_thread(self.RunMeasurementsThread, ())
@@ -274,6 +261,7 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         self.CalculateMass()
                         self.MassMeasurements.append(self.mass)
                         self.EventLog.AppendText("Completed measurement " + str(i+1) + " \n")
+                        self.EventLog.AppendText("Mass : " + str(self.mass) + " \n")
                 self.EventLog.AppendText("Completed all measurements\n")
                 print(self.currents)
                 print(self.phidgetVoltages)
@@ -312,13 +300,13 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
                         #         continue
                         # oldTime = i
                         self.GetCoilVoltages()
-                        times.append(round(i, 6))
-                        position.append(round((-11.6*latestAinValues[2]-3.09)/1000, 6))
+                        times.append(i)
+                        position.append(round((8.91-73*latestAinValues[2]+131*latestAinValues[2]*latestAinValues[2])/1000, 6))
                         coilVolt.append(round(latestAinValues[1], 6))
-                        if i > 30:
+                        if i > 10:
                                 break
                         #time.sleep(0.001)
-                        o = 0.15*np.sin(8*i)
+                        o = 2.5*np.sin(30*i)
                         Phidget.setVoltage(o, 0)
                 print(times)
                 print("\n")
@@ -339,8 +327,6 @@ class LEGOKibbleBalance(LEGOKibbleBalanceGUI.LEGOKibbleBalance):
 
         def IOffsetButtonOnButtonClick(self, event):
                 self.IOffsetField.SetValue(self.CurrentThroughCoilA.GetValue())
-
-
 
 # mandatory in wx, create an app, False stands for not deteriction stdin/stdout
 # refer manual for details
